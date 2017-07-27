@@ -38,19 +38,19 @@ private:
 	
 };
 
-class SmartPtr {
+class VectorUser {
 public:
-	SmartPtr(std::vector<int>* resource)  { }
+	VectorUser(std::vector<int>* resource)  { }
 
-	SmartPtr(const SmartPtr& other) {
-
-	}
-
-	~SmartPtr() {
+	VectorUser(const VectorUser& other) {
 
 	}
 
-	auto operator=(const SmartPtr& other) -> SmartPtr& {
+	~VectorUser() {
+
+	}
+
+	auto operator=(const VectorUser& other) -> VectorUser& {
 
 	}
 
@@ -78,8 +78,8 @@ auto FillVector(std::vector<int>& vec, const size_t minRange, const size_t maxRa
 	}
 }
 
-auto GenerateNumbers(const size_t size) -> SmartPtr {
-	auto numbers = SmartPtr(new std::vector<int>(size));
+auto GenerateNumbers(const size_t size) -> VectorUser {
+	auto numbers = VectorUser(new std::vector<int>(size));
 
 	FillVector(*numbers, 0, size);
 	return numbers;
@@ -91,12 +91,12 @@ auto main() -> int {
 	PrintVector(*numbers);
 
 	{
-		SmartPtr sameNumbers = numbers;
-		SmartPtr alsoSameNumbers = numbers;
+		auto sameNumbers = numbers;
+        auto alsoSameNumbers = numbers;
 	}
 
 	{
-		SmartPtr sameNumbers = numbers;
+		VectorUser sameNumbers = numbers;
 	}
 
 	return 0;

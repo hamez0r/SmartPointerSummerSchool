@@ -44,19 +44,19 @@ private:
 	
 };
 
-class SmartPtr {
+class VectorUser {
 public:
-	SmartPtr(std::vector<int>* resource)  { }
+	VectorUser(std::vector<int>* resource)  { }
 
-	SmartPtr(const SmartPtr& other) {
-
-	}
-
-	~SmartPtr() {
+	VectorUser(const VectorUser& other) {
 
 	}
 
-	auto operator=(const SmartPtr& other) -> SmartPtr& {
+	~VectorUser() {
+
+	}
+
+	auto operator=(const VectorUser& other) -> VectorUser& {
 
 	}
 
@@ -96,7 +96,7 @@ auto GetSomeRest() -> void {
 	std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
 }
 
-auto ShowMinimumInRange(SmartPtr numbers, const size_t start, const size_t end) -> void {
+auto ShowMinimumInRange(VectorUser numbers, const size_t start, const size_t end) -> void {
 	// This call has no real value, it's only to show that threads 
 	// can finish their job in an arbitrary order
 	GetSomeRest();
@@ -113,8 +113,8 @@ auto ShowMinimumInRange(SmartPtr numbers, const size_t start, const size_t end) 
 	PrintMinimum(start, end, *min);
 }
 
-auto GenerateNumbers(const size_t size) -> SmartPtr {
-	auto numbers = SmartPtr(new std::vector<int>(size));
+auto GenerateNumbers(const size_t size) -> VectorUser {
+	auto numbers = VectorUser(new std::vector<int>(size));
 
 	FillVector(*numbers, 0, size);
 	return numbers;
