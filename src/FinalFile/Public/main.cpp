@@ -1,6 +1,6 @@
 #include <iostream>
-#include <fstream>
 #include <string>
+#include <memory>
 
 auto JonSnowDies(const std::string& content) -> bool {
     return content == "Jon Snow dies";
@@ -14,11 +14,18 @@ auto CerseiDies(const std::string& content) -> bool {
     return content == "Cersei dies";
 }
 
+struct Deleter {
+    void operator()(FILE* f) const {
+        std::cout << "Deleter is releasing a FILE\n";
+        fclose(f);
+    };
+};
+
 auto ReadFile(const std::string& fileName) -> void {
-    FILE* file = fopen(fileName.c_str(), "r");
+    auto file = std::unique_ptr<FILE, Deleter>(fopen(fileName.c_str(), "r"));
     if (file) {
         char line[256] = { '\0' };
-        fread(line, 1, sizeof(line), file);
+        fread(line, 1, sizeof(line), file.get());
 
         if (JonSnowDies(line))
             throw "But... But... King in the North...";
@@ -30,8 +37,6 @@ auto ReadFile(const std::string& fileName) -> void {
             throw "A party";
 
         else std::cout << "OK, now show me those dragons" << std::endl;
-
-        fclose(file);
     }
 }
 
