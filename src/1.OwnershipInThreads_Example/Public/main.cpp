@@ -11,65 +11,10 @@
 
 // The program creates an array of 1000 integers, then passses it
 // to two threads. Each thread will find the minimum value in a given range.
-// We're using a smart pointer to be smart about our resources.
+// Once a thread finishes its job, we don't want the resources to leak,
+// so we call delete
 
-std::mutex mutex; // It's related to threads, don't worry about this
-
-class ReferenceCounter {
-public:
-	ReferenceCounter() { }
-
-	// No copy constructor
-	ReferenceCounter(const ReferenceCounter& other) { }
-
-	~ReferenceCounter() { }	
-
-	// No asignment operator
-	auto operator=(const ReferenceCounter& other) { }
-
-	// Public API
-	auto Incremet() -> void {
-		
-	}
-
-	auto Decrement() -> void {
-		
-	}
-
-	auto GetCount() const -> unsigned int {
-		return 0;
-	}
-
-private:
-	
-};
-
-class VectorUser {
-public:
-	VectorUser(std::vector<int>* resource)  { }
-
-	VectorUser(const VectorUser& other) {
-
-	}
-
-	~VectorUser() {
-
-	}
-
-	auto operator=(const VectorUser& other) -> VectorUser& {
-
-	}
-
-	auto operator*() -> std::vector<int>& {
-		return std::vector<int>(); // remove this line when you start coding
-	}
-
-	auto operator->() -> std::vector<int>* {
-		return nullptr;
-	}
-
-private:
-};
+std::mutex mutex;
 
 auto PrintMinimum(const size_t startRange, const size_t endRange, const int min) -> void {
 	// If we remove the lock guard, the output might get scrambled. Go ahead, try it!
@@ -96,7 +41,7 @@ auto GetSomeRest() -> void {
 	std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
 }
 
-auto ShowMinimumInRange(VectorUser numbers, const size_t start, const size_t end) -> void {
+auto ShowMinimumInRange(std::vector<int>* numbers, const size_t start, const size_t end) -> void {
 	// This call has no real value, it's only to show that threads 
 	// can finish their job in an arbitrary order
 	GetSomeRest();
@@ -111,16 +56,26 @@ auto ShowMinimumInRange(VectorUser numbers, const size_t start, const size_t end
 	auto min = std::min_element(startPosition, endPosition);
 
 	PrintMinimum(start, end, *min);
+	delete numbers;
 }
 
-auto GenerateNumbers(const size_t size) -> VectorUser {
-	auto numbers = VectorUser(new std::vector<int>(size));
+auto GenerateNumbers(const size_t size) -> std::vector<int>* {
+	auto numbers = new std::vector<int>(size);
 
 	FillVector(*numbers, 0, size);
 	return numbers;
 }
 
-auto main() -> int {
+auto ObserveScopes() -> void {
+	const size_t size = 10;
+	auto numbers = GenerateNumbers(size);
+	PrintVector(*numbers);
+
+	ShowMinimumInRange(numbers, 0, size / 2);
+	ShowMinimumInRange(numbers, size / 2, size);
+}
+
+auto RunThreads() -> void {
 	// Don't worry about this, it's just something to make rand() work
 	std::srand(0);
 
@@ -135,6 +90,11 @@ auto main() -> int {
 
 	firstHalf.join();
 	secondHalf.join();
+}
+
+auto main() -> int {
+	ObserveScopes();
+	RunThreads();
 
 	return 0;
 }

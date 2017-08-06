@@ -17,82 +17,58 @@ std::mutex mutex; // It's related to threads, don't worry about this
 
 class ReferenceCounter {
 public:
-	ReferenceCounter() : m_counter(1) { }
+	ReferenceCounter() { }
 
 	// No copy constructor
-	ReferenceCounter(const ReferenceCounter& other) = delete;
+	ReferenceCounter(const ReferenceCounter& other) { }
 
 	~ReferenceCounter() { }	
 
 	// No asignment operator
-	auto operator=(const ReferenceCounter& other) = delete;
+	auto operator=(const ReferenceCounter& other) { }
 
 	// Public API
 	auto Incremet() -> void {
-		m_counter++;
+		
 	}
 
 	auto Decrement() -> void {
-		m_counter--;
+		
 	}
 
 	auto GetCount() const -> unsigned int {
-		return m_counter;
+		return 0;
 	}
 
 private:
-	unsigned int m_counter;
+	
 };
 
 class VectorUser {
 public:
-	VectorUser(std::vector<int>* resource) 
-		: m_resource(resource), m_refCounts(new ReferenceCounter()) { }
+	VectorUser(std::vector<int>* resource)  { }
 
 	VectorUser(const VectorUser& other) {
-		m_resource = other.m_resource;
-		m_refCounts = other.m_refCounts;
-		m_refCounts->Incremet();
+
 	}
 
 	~VectorUser() {
-		m_refCounts->Decrement();
 
-		auto refCount = m_refCounts->GetCount();
-		if (refCount == 0) {
-			delete m_refCounts;
-			delete m_resource;
-		}
 	}
 
 	auto operator=(const VectorUser& other) -> VectorUser& {
-		if (this == &other) return *this;
 
-		m_refCounts->Decrement();
-		auto refCount = m_refCounts->GetCount();
-		if (refCount == 0) {
-			delete m_refCounts;
-			delete m_resource;
-		}
-
-		m_resource = other.m_resource;
-		m_refCounts = other.m_refCounts;
-		m_refCounts->Incremet();
-		
-		return *this;
 	}
 
 	auto operator*() -> std::vector<int>& {
-		return *m_resource;
+		return *(new std::vector<int>()); // remove this line when you start coding
 	}
 
 	auto operator->() -> std::vector<int>* {
-		return m_resource;
+		return nullptr;
 	}
 
 private:
-	std::vector<int>* m_resource;
-	ReferenceCounter* m_refCounts;
 };
 
 auto PrintMinimum(const size_t startRange, const size_t endRange, const int min) -> void {
@@ -144,7 +120,7 @@ auto GenerateNumbers(const size_t size) -> VectorUser {
 	return numbers;
 }
 
-auto main() -> int {
+auto RunThreads() -> void {
 	// Don't worry about this, it's just something to make rand() work
 	std::srand(0);
 
@@ -159,6 +135,26 @@ auto main() -> int {
 
 	firstHalf.join();
 	secondHalf.join();
+}
+
+auto ObserveScopes() -> void {
+	const size_t size = 10;
+	auto numbers = GenerateNumbers(size);
+	PrintVector(*numbers);
+
+	{
+		auto sameNumbers = numbers;
+		auto alsoSameNumbers = numbers;
+	}
+
+	{
+		VectorUser sameNumbers = numbers;
+	}
+}
+
+auto main() -> int {
+	ObserveScopes();
+	RunThreads();
 
 	return 0;
 }

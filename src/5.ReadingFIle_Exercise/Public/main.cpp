@@ -16,31 +16,22 @@ auto CerseiDies(const std::string& content) -> bool {
 
 class File {
 public:
-    File(const std::string& fileName, int (*closeFunction)(FILE*))
-        : m_closeFunction (closeFunction) {
-        m_file = fopen(fileName.c_str(), "r");
-    }
+    File() {  }
 
-    auto IsOpen() -> bool { return m_file != nullptr; }
+    auto IsOpen() -> bool { return false; }
 
     auto ReadLine() -> std::string {
-        char line[256] = { '\0' };
-        fread(line, 1, sizeof(line), m_file);
-        return line;
+		return "";
     }
 
-    ~File() {
-        m_closeFunction(m_file);
-    }
+    ~File() { }
 
 private:
-    FILE* m_file;
-    int (*m_closeFunction)(FILE*);
 };
 
 auto ReadFile(const std::string& fileName) -> void {
     char line[256] = { '\0' };
-    auto file = File(fileName, fclose);
+	auto file = File();
     if (file.IsOpen()) {
         auto line = file.ReadLine();
 
